@@ -12,17 +12,17 @@ namespace IotTest.Controllers
     [Route("[controller]")]
     public class RfidController : Controller
     {
-        private ITagReader TagReader { get; set; }
+        private IRfidReader RfidReader { get; set; }
 
-        public RfidController(ITagReader tagReader)
+        public RfidController(IRfidReader rfidReader)
         {
-            TagReader = tagReader;
+            RfidReader = rfidReader;
         }
 
         [HttpGet("GetLastReadTag")]
         public IActionResult GetLastReadTag()
         {
-            var tag = TagReader.GetLastReadTag();
+            var tag = RfidReader.GetLastReadTag();
             if(tag != null) 
             {
                 var (a, b, c, d) = ((byte, byte, byte, byte))tag;

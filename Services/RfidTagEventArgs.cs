@@ -2,9 +2,9 @@ using System;
 
 namespace IotTest.Services
 {
-    public class TagEventArgs : EventArgs
+    public class RfidTagEventArgs : EventArgs
     {
-        public TagEventArgs((byte, byte, byte, byte) tag) 
+        public RfidTagEventArgs((byte, byte, byte, byte) tag) 
         {
             Tag = tag;
         }

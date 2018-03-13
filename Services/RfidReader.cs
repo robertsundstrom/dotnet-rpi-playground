@@ -17,13 +17,13 @@ using System.Reactive.Linq;
 
 namespace IotTest.Services
 {
-    public class TagReader : ITagReader
+    public class RfidReader : IRfidReader
     {
         private CancellationTokenSource cts;
         private Task task;
         private (byte, byte, byte, byte)? lastReadTag;
 
-        public event EventHandler<TagEventArgs> TagRead;
+        public event EventHandler<RfidTagEventArgs> TagRead;
 
         public (byte, byte, byte, byte)? GetLastReadTag() => lastReadTag;
 
@@ -62,7 +62,7 @@ namespace IotTest.Services
                         // Print UID
                         $"Card read UID: {uid[0]}, {uid[1]}, {uid[2]}, {uid[3]}".Info();
 
-                        TagRead?.Invoke(this, new TagEventArgs(readTag));
+                        TagRead?.Invoke(this, new RfidTagEventArgs(readTag));
                         // }
                     }
                 }

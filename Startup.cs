@@ -41,7 +41,7 @@ namespace IotTest
                 c.DescribeAllEnumsAsStrings();
             });
 
-            services.AddSingleton<ITagReader, TagReader>();
+            services.AddSingleton<IRfidReader, RfidReader>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,14 +71,14 @@ namespace IotTest
 
             app.MapWebSocketManager("/notifications", serviceProvider.GetService<NotificationsMessageHandler>());
 
-            var tagReader = serviceProvider.GetService<ITagReader>();
+            var rfidReader = serviceProvider.GetService<IRfidReader>();
             var notificationsMessageHandler = serviceProvider.GetService<NotificationsMessageHandler>();
-            tagReader.TagRead += (s, e) => {
+            rfidReader.TagRead += (s, e) => {
                 var (a, b, c, d) = e.Tag;
                 var tag = $"{a},{b},{c},{d}";
                 notificationsMessageHandler.InvokeClientMethodToAllAsync("rfidRead", tag);
             };
-            tagReader.Start();
+            rfidReader.Start();
         }
     }
 }
