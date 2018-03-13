@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RuntimeIdentifiers>linux-arm;win10-x64;ubuntu.14.04-arm;ubuntu.16.04-arm</RuntimeIdentifiers>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <SshDeployHost>192.168.1.39</SshDeployHost>
+    <SshDeployTargetPath>/home/pi/test</SshDeployTargetPath>
+    <SshDeployUsername>pi</SshDeployUsername>
+    <SshDeployPassword>raspberry</SshDeployPassword>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0-preview1-final" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.0-preview1-final" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="2.2.0" />
+    <PackageReference Include="System.Reactive" Version="3.1.1" />
+    <PackageReference Include="Unosquare.Raspberry.IO" Version="0.13.0" />
+    <PackageReference Include="Unosquare.Swan" Version="0.16.0" />
+    <PackageReference Include="WebSocketManager" Version="1.0.1" />
+  </ItemGroup>
+
+   <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-sshdeploy" Version="0.2.1" />
+  </ItemGroup>
+
+  <Target Condition="$(BuildingInsideSshDeploy) ==''" Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="cd $(ProjectDir)" />
+    <Exec Command="dotnet sshdeploy push --runtime linux-arm --framework netcoreapp2.1" />
+  </Target>
+
+</Project>
