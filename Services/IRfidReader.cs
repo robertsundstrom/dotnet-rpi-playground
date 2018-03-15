@@ -10,6 +10,8 @@ namespace IotTest.Services
 
         event EventHandler<RfidTagEventArgs> TagRead;
 
+        IObservable<RfidTagEventArgs> WhenTagRead { get; }
+
         (byte, byte, byte, byte)? GetLastReadTag();
     }
 }

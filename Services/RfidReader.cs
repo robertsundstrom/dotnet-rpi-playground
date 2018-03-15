@@ -27,6 +27,12 @@ namespace IotTest.Services
 
         public (byte, byte, byte, byte)? GetLastReadTag() => lastReadTag;
 
+        public IObservable<RfidTagEventArgs> WhenTagRead => Observable
+            .FromEventPattern<RfidTagEventArgs>(
+                handler => TagRead += handler, 
+                handler => TagRead -= handler)
+            .Select(x => x.EventArgs);
+
         public void Start()
         {
             cts = new CancellationTokenSource();

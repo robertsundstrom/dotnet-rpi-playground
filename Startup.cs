@@ -73,7 +73,7 @@ namespace IotTest
 
             var rfidReader = serviceProvider.GetService<IRfidReader>();
             var notificationsMessageHandler = serviceProvider.GetService<NotificationsMessageHandler>();
-            rfidReader.TagRead += (s, e) => {
+            rfidReader.WhenTagRead.Subscribe(e => {
                 var (a, b, c, d) = e.Tag;
                 var tag = $"{a},{b},{c},{d}";
                 notificationsMessageHandler.InvokeClientMethodToAllAsync("rfidRead", tag);

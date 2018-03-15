@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <SshDeployHost>192.168.1.39</SshDeployHost>
+    <SshDeployHost>192.168.1.254</SshDeployHost>
     <SshDeployTargetPath>/home/pi/test</SshDeployTargetPath>
     <SshDeployUsername>pi</SshDeployUsername>
     <SshDeployPassword>raspberry</SshDeployPassword>
