@@ -29,7 +29,7 @@ namespace IotTest.Services
 
         public IObservable<RfidTagEventArgs> WhenTagRead => Observable
             .FromEventPattern<RfidTagEventArgs>(
-                handler => TagRead += handler, 
+                handler => TagRead += handler,
                 handler => TagRead -= handler)
             .Select(x => x.EventArgs);
 
@@ -38,15 +38,15 @@ namespace IotTest.Services
             cts = new CancellationTokenSource();
             task = Task.Run(() =>
             {
-                var mfrc522 = new Mfrc522Controller();
+                var mfrc522 = new RFIDControllerMfrc522();
 
                 while (true)
                 {
                     // Scan for cards
-                    var (status, _) = mfrc522.Request(Mfrc522Controller.PICC_REQIDL);
+                    var response = mfrc522.DetectCard();
 
                     // If a card is found
-                    if (status == Mfrc522Controller.MI_OK)
+                    if (response == RFIDControllerMfrc522.Status.AllOk)
                     {
                         if (cts.IsCancellationRequested)
                             return;
@@ -55,9 +55,10 @@ namespace IotTest.Services
                     }
 
                     // Get the UID of the card
-                    var (status2, uid)  = mfrc522.Anticoll();
+                    var response2 = mfrc522.ReadCardUniqueId();
+                    var uid = response2.Data;
 
-                    if (status2 == Mfrc522Controller.MI_OK)
+                    if (response2.Status == RFIDControllerMfrc522.Status.AllOk)
                     {
                         var readTag = (uid[0], uid[1], uid[2], uid[3]);
 

@@ -7,367 +7,968 @@ namespace IotTest
     using Unosquare.Swan;
     using Unosquare.Swan.Abstractions;
 
-    public class Mfrc522Controller
+    /// <summary>
+    /// Read and write different types of Radio-Frequency IDentification (RFID) cards on your
+    /// Raspberry Pi using a RC522 based reader connected via the Serial Peripheral Interface (SPI) interface.
+    /// </summary>
+    public class RFIDControllerMfrc522
     {
-        const byte NRSTPD = 22;
+        /// <summary>
+        /// The default authentication key
+        /// </summary>
+        public static readonly byte[] DefaultAuthKey = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
-        const byte MAX_LEN = 16;
+        #region Private Members
 
-        const byte PCD_IDLE = 0x00;
-        const byte PCD_AUTHENT = 0x0E;
-        const byte PCD_RECEIVE = 0x08;
-        const byte PCD_TRANSMIT = 0x04;
-        const byte PCD_TRANSCEIVE = 0x0C;
-        const byte PCD_RESETPHASE = 0x0F;
-        const byte PCD_CALCCRC = 0x03;
+        private readonly SpiChannel SpiPort = null;
+        private readonly GpioPin OutputPort = null;
 
-        public const byte PICC_REQIDL = 0x26;
-        public const byte PICC_REQALL = 0x52;
-        public const byte PICC_ANTICOLL = 0x93;
-        public const byte PICC_SElECTTAG = 0x93;
-        public const byte PICC_AUTHENT1A = 0x60;
-        public const byte PICC_AUTHENT1B = 0x61;
-        public const byte PICC_READ = 0x30;
-        public const byte PICC_WRITE = 0xA0;
-        public const byte PICC_DECREMENT = 0xC0;
-        public const byte PICC_INCREMENT = 0xC1;
-        public const byte PICC_RESTORE = 0xC2;
-        public const byte PICC_TRANSFER = 0xB0;
-        public const byte PICC_HALT = 0x50;
+        #endregion
 
-        public const byte MI_OK = 0;
-        public const byte MI_NOTAGERR = 1;
-        public const byte MI_ERR = 2;
+        #region Constructors
 
-        const byte Reserved00 = 0x00;
-        const byte CommandReg = 0x01;
-        const byte CommIEnReg = 0x02;
-        const byte DivlEnReg = 0x03;
-        const byte CommIrqReg = 0x04;
-        const byte DivIrqReg = 0x05;
-        const byte ErrorReg = 0x06;
-        const byte Status1Reg = 0x07;
-        const byte Status2Reg = 0x08;
-        const byte FIFODataReg = 0x09;
-        const byte FIFOLevelReg = 0x0A;
-        const byte WaterLevelReg = 0x0B;
-        const byte ControlReg = 0x0C;
-        const byte BitFramingReg = 0x0D;
-        const byte CollReg = 0x0E;
-        const byte Reserved01 = 0x0F;
-
-        const byte Reserved10 = 0x10;
-        const byte ModeReg = 0x11;
-        const byte TxModeReg = 0x12;
-        const byte RxModeReg = 0x13;
-        const byte TxControlReg = 0x14;
-        const byte TxAutoReg = 0x15;
-        const byte TxSelReg = 0x16;
-        const byte RxSelReg = 0x17;
-        const byte RxThresholdReg = 0x18;
-        const byte DemodReg = 0x19;
-        const byte Reserved11 = 0x1A;
-        const byte Reserved12 = 0x1B;
-        const byte MifareReg = 0x1C;
-        const byte Reserved13 = 0x1D;
-        const byte Reserved14 = 0x1E;
-        const byte SerialSpeedReg = 0x1F;
-
-        const byte Reserved20 = 0x20;
-        const byte CRCResultRegM = 0x21;
-        const byte CRCResultRegL = 0x22;
-        const byte Reserved21 = 0x23;
-        const byte ModWidthReg = 0x24;
-        const byte Reserved22 = 0x25;
-        const byte RFCfgReg = 0x26;
-        const byte GsNReg = 0x27;
-        const byte CWGsPReg = 0x28;
-        const byte ModGsPReg = 0x29;
-        const byte TModeReg = 0x2A;
-        const byte TPrescalerReg = 0x2B;
-        const byte TReloadRegH = 0x2C;
-        const byte TReloadRegL = 0x2D;
-        const byte TCounterValueRegH = 0x2E;
-        const byte TCounterValueRegL = 0x2F;
-
-        const byte Reserved30 = 0x30;
-        const byte TestSel1Reg = 0x31;
-        const byte TestSel2Reg = 0x32;
-        const byte TestPinEnReg = 0x33;
-        const byte TestPinValueReg = 0x34;
-        const byte TestBusReg = 0x35;
-        const byte AutoTestReg = 0x36;
-        const byte VersionReg = 0x37;
-        const byte AnalogTestReg = 0x38;
-        const byte TestDAC1Reg = 0x39;
-        const byte TestDAC2Reg = 0x3A;
-        const byte TestADCReg = 0x3B;
-        const byte Reserved31 = 0x3C;
-        const byte Reserved32 = 0x3D;
-        const byte Reserved33 = 0x3E;
-        const byte Reserved34 = 0x3F;
-
-        private readonly SpiChannel _spi;
-
-        public Mfrc522Controller()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RFIDControllerMfrc522"/> class.
+        /// </summary>
+        public RFIDControllerMfrc522()
+            : this(Pi.Spi.Channel0, 500000, Pi.Gpio[22])
         {
-            Pi.Spi.Channel0Frequency = 500000;
-            _spi = Pi.Spi.Channel0;
-
-            var nrstdpPin = Pi.Gpio[NRSTPD];
-            nrstdpPin.PinMode = GpioPinDriveMode.Output;
-            nrstdpPin.Write(true);
-
-            Init();
+            // placeholder
         }
 
-        public void Init()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RFIDControllerMfrc522" /> class.
+        /// </summary>
+        /// <param name="spiPort">The spi port.</param>
+        /// <param name="spiFrquency">The spi frquency.</param>
+        /// <param name="outputPort">The output port.</param>
+        public RFIDControllerMfrc522(SpiChannel spiPort, int spiFrquency, GpioPin outputPort)
         {
-            var nrstdpPin = Pi.Gpio[NRSTPD];
-            nrstdpPin.PinMode = GpioPinDriveMode.Output;
-            nrstdpPin.Write(true);
-
-            Reset();
-
-            WriteSpi(TModeReg, 0x8D);
-            WriteSpi(TPrescalerReg, 0x3E);
-            WriteSpi(TReloadRegL, 30);
-            WriteSpi(TReloadRegH, 0);
-
-            WriteSpi(TxAutoReg, 0x40);
-            WriteSpi(ModeReg, 0x3D);
-
-            AntennaOn();
+            Pi.Spi.Channel0Frequency = spiFrquency;
+            SpiPort = spiPort;
+            OutputPort = outputPort;
+            InitializeComponent();
         }
 
-        private void Reset()
+        #endregion
+
+        #region Enumerations
+
+        /// <summary>
+        /// Contains constants for well-known commands
+        /// </summary>
+        public enum Command : byte
         {
-            WriteSpi(CommandReg, PCD_RESETPHASE);
+            /// <summary>
+            /// The idle Command
+            /// </summary>
+            Idle = 0x00,
+
+            /// <summary>
+            /// The authenticate Command
+            /// </summary>
+            Authenticate = 0x0E,
+
+            /// <summary>
+            /// The receive Command
+            /// </summary>
+            Receive = 0x08,
+
+            /// <summary>
+            /// The transmit Command
+            /// </summary>
+            Transmit = 0x04,
+
+            /// <summary>
+            /// The transcieve Command
+            /// </summary>
+            Transcieve = 0x0C,
+
+            /// <summary>
+            /// The reset phase Command
+            /// </summary>
+            ResetPhase = 0x0F,
+
+            /// <summary>
+            /// The compute CRC Command
+            /// </summary>
+            ComputeCrc = 0x03,
         }
 
-        public void WriteSpi(byte addr, byte val)
+        /// <summary>
+        /// Enumerates all 64 registers in the device.
+        /// </summary>
+        public enum Register : byte
         {
-            _spi.Write(new byte[]
-            {
-                (byte) ((addr << 1) & 0x7E),
-                val
-            });
+            /// <summary>
+            /// The reserved00
+            /// </summary>
+            Reserved00 = 0x00,
+
+            /// <summary>
+            /// The command reg
+            /// </summary>
+            CommandReg = 0x01,
+
+            /// <summary>
+            /// The comm i en reg
+            /// </summary>
+            CommIEnReg = 0x02,
+
+            /// <summary>
+            /// The divl en reg
+            /// </summary>
+            DivlEnReg = 0x03,
+
+            /// <summary>
+            /// The comm irq reg
+            /// </summary>
+            CommIrqReg = 0x04,
+
+            /// <summary>
+            /// The div irq reg
+            /// </summary>
+            DivIrqReg = 0x05,
+
+            /// <summary>
+            /// The error reg
+            /// </summary>
+            ErrorReg = 0x06,
+
+            /// <summary>
+            /// The status1 reg
+            /// </summary>
+            Status1Reg = 0x07,
+
+            /// <summary>
+            /// The status2 reg
+            /// </summary>
+            Status2Reg = 0x08,
+
+            /// <summary>
+            /// The fifo data reg
+            /// </summary>
+            FIFODataReg = 0x09,
+
+            /// <summary>
+            /// The fifo level reg
+            /// </summary>
+            FIFOLevelReg = 0x0A,
+
+            /// <summary>
+            /// The water level reg
+            /// </summary>
+            WaterLevelReg = 0x0B,
+
+            /// <summary>
+            /// The control reg
+            /// </summary>
+            ControlReg = 0x0C,
+
+            /// <summary>
+            /// The bit framing reg
+            /// </summary>
+            BitFramingReg = 0x0D,
+
+            /// <summary>
+            /// The coll reg
+            /// </summary>
+            CollReg = 0x0E,
+
+            /// <summary>
+            /// The reserved01
+            /// </summary>
+            Reserved01 = 0x0F,
+
+            /// <summary>
+            /// The reserved10
+            /// </summary>
+            Reserved10 = 0x10,
+
+            /// <summary>
+            /// The mode reg
+            /// </summary>
+            ModeReg = 0x11,
+
+            /// <summary>
+            /// The tx mode reg
+            /// </summary>
+            TxModeReg = 0x12,
+
+            /// <summary>
+            /// The rx mode reg
+            /// </summary>
+            RxModeReg = 0x13,
+
+            /// <summary>
+            /// The tx control reg
+            /// </summary>
+            TxControlReg = 0x14,
+
+            /// <summary>
+            /// The tx automatic reg
+            /// </summary>
+            TxAutoReg = 0x15,
+
+            /// <summary>
+            /// The tx sel reg
+            /// </summary>
+            TxSelReg = 0x16,
+
+            /// <summary>
+            /// The rx sel reg
+            /// </summary>
+            RxSelReg = 0x17,
+
+            /// <summary>
+            /// The rx threshold reg
+            /// </summary>
+            RxThresholdReg = 0x18,
+
+            /// <summary>
+            /// The demod reg
+            /// </summary>
+            DemodReg = 0x19,
+
+            /// <summary>
+            /// The reserved11
+            /// </summary>
+            Reserved11 = 0x1A,
+
+            /// <summary>
+            /// The reserved12
+            /// </summary>
+            Reserved12 = 0x1B,
+
+            /// <summary>
+            /// The mifare reg
+            /// </summary>
+            MifareReg = 0x1C,
+
+            /// <summary>
+            /// The reserved13
+            /// </summary>
+            Reserved13 = 0x1D,
+
+            /// <summary>
+            /// The reserved14
+            /// </summary>
+            Reserved14 = 0x1E,
+
+            /// <summary>
+            /// The serial speed reg
+            /// </summary>
+            SerialSpeedReg = 0x1F,
+
+            /// <summary>
+            /// The reserved20
+            /// </summary>
+            Reserved20 = 0x20,
+
+            /// <summary>
+            /// The CRC result reg m
+            /// </summary>
+            CRCResultRegM = 0x21,
+
+            /// <summary>
+            /// The CRC result reg l
+            /// </summary>
+            CRCResultRegL = 0x22,
+
+            /// <summary>
+            /// The reserved21
+            /// </summary>
+            Reserved21 = 0x23,
+
+            /// <summary>
+            /// The mod width reg
+            /// </summary>
+            ModWidthReg = 0x24,
+
+            /// <summary>
+            /// The reserved22
+            /// </summary>
+            Reserved22 = 0x25,
+
+            /// <summary>
+            /// The rf CFG reg
+            /// </summary>
+            RFCfgReg = 0x26,
+
+            /// <summary>
+            /// The gs n reg
+            /// </summary>
+            GsNReg = 0x27,
+
+            /// <summary>
+            /// The cw gs p reg
+            /// </summary>
+            CWGsPReg = 0x28,
+
+            /// <summary>
+            /// The mod gs p reg
+            /// </summary>
+            ModGsPReg = 0x29,
+
+            /// <summary>
+            /// The t mode reg
+            /// </summary>
+            TModeReg = 0x2A,
+
+            /// <summary>
+            /// The t prescaler reg
+            /// </summary>
+            TPrescalerReg = 0x2B,
+
+            /// <summary>
+            /// The t reload reg h
+            /// </summary>
+            TReloadRegH = 0x2C,
+
+            /// <summary>
+            /// The t reload reg l
+            /// </summary>
+            TReloadRegL = 0x2D,
+
+            /// <summary>
+            /// The t counter value reg h
+            /// </summary>
+            TCounterValueRegH = 0x2E,
+
+            /// <summary>
+            /// The t counter value reg l
+            /// </summary>
+            TCounterValueRegL = 0x2F,
+
+            /// <summary>
+            /// The reserved30
+            /// </summary>
+            Reserved30 = 0x30,
+
+            /// <summary>
+            /// The test sel1 reg
+            /// </summary>
+            TestSel1Reg = 0x31,
+
+            /// <summary>
+            /// The test sel2 reg
+            /// </summary>
+            TestSel2Reg = 0x32,
+
+            /// <summary>
+            /// The test pin en reg
+            /// </summary>
+            TestPinEnReg = 0x33,
+
+            /// <summary>
+            /// The test pin value reg
+            /// </summary>
+            TestPinValueReg = 0x34,
+
+            /// <summary>
+            /// The test bus reg
+            /// </summary>
+            TestBusReg = 0x35,
+
+            /// <summary>
+            /// The automatic test reg
+            /// </summary>
+            AutoTestReg = 0x36,
+
+            /// <summary>
+            /// The version reg
+            /// </summary>
+            VersionReg = 0x37,
+
+            /// <summary>
+            /// The analog test reg
+            /// </summary>
+            AnalogTestReg = 0x38,
+
+            /// <summary>
+            /// The test da c1 reg
+            /// </summary>
+            TestDAC1Reg = 0x39,
+
+            /// <summary>
+            /// The test da c2 reg
+            /// </summary>
+            TestDAC2Reg = 0x3A,
+
+            /// <summary>
+            /// The test adc reg
+            /// </summary>
+            TestADCReg = 0x3B,
+
+            /// <summary>
+            /// The reserved31
+            /// </summary>
+            Reserved31 = 0x3C,
+
+            /// <summary>
+            /// The reserved32
+            /// </summary>
+            Reserved32 = 0x3D,
+
+            /// <summary>
+            /// The reserved33
+            /// </summary>
+            Reserved33 = 0x3E,
+
+            /// <summary>
+            /// The reserved34
+            /// </summary>
+            Reserved34 = 0x3F,
         }
 
-        public byte ReadSpi(byte addr)
+        /// <summary>
+        /// umerates the available request mode codes.
+        /// </summary>
+        public enum RequestMode : byte
         {
-            var val = _spi.SendReceive(new byte[]
-            {
-                (byte) (((addr << 1) & 0x7E) | 0x80),
-                0
-            });
-            return val[1];
+            /// <summary>
+            /// The request idle mode
+            /// </summary>
+            RequestIdle = 0x26,
+
+            /// <summary>
+            /// The request all mode
+            /// </summary>
+            RequestAll = 0x52,
+
+            /// <summary>
+            /// The anti collision mode
+            /// </summary>
+            AntiCollision = 0x93,
+
+            /// <summary>
+            /// The select tag mode
+            /// </summary>
+            SelectTag = 0x93,
+
+            /// <summary>
+            /// The authenticate1 a mode
+            /// </summary>
+            Authenticate1A = 0x60,
+
+            /// <summary>
+            /// The authenticate1 b mode
+            /// </summary>
+            Authenticate1B = 0x61,
+
+            /// <summary>
+            /// The read mode
+            /// </summary>
+            Read = 0x30,
+
+            /// <summary>
+            /// The write mode
+            /// </summary>
+            Write = 0xA0,
+
+            /// <summary>
+            /// The decrement mode
+            /// </summary>
+            Decrement = 0xC0,
+
+            /// <summary>
+            /// The increment mode
+            /// </summary>
+            Increment = 0xC1,
+
+            /// <summary>
+            /// The restore mode
+            /// </summary>
+            Restore = 0xC2,
+
+            /// <summary>
+            /// The transfer mode
+            /// </summary>
+            Transfer = 0xB0,
+
+            /// <summary>
+            /// The halt mode
+            /// </summary>
+            Halt = 0x50,
         }
 
-        private void SetBitMask(byte reg, byte mask)
+        /// <summary>
+        /// Enumerates the different statuses
+        /// </summary>
+        public enum Status : byte
         {
-            var tmp = ReadSpi(reg);
-            WriteSpi(reg, (byte)(tmp | mask));
+            /// <summary>
+            /// All ok status
+            /// </summary>
+            AllOk = 0,
+
+            /// <summary>
+            /// The no tag error status
+            /// </summary>
+            NoTagError = 1,
+
+            /// <summary>
+            /// The error status
+            /// </summary>
+            Error = 2,
         }
 
-        private void ClearBitMask(byte reg, byte mask)
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Sends the reset phase command to the RFID Controller.
+        /// </summary>
+        public void Reset()
         {
-            var tmp = ReadSpi(reg);
-            WriteSpi(reg, (byte)(tmp & (~mask)));
+            WriteCommand(Command.ResetPhase);
         }
 
-        private void AntennaOn()
+        /// <summary>
+        /// Turns the RFID antenna on.
+        /// </summary>
+        public void TurnAntennaOn()
         {
-            var temp = ReadSpi(TxControlReg);
-            //if (~(temp & 0x03) == 1)
-            //{
-            SetBitMask(TxControlReg, 0x03);
-            //}
+            var temp = ReadRegister(Register.TxControlReg);
+
+            // if (~(temp & 0x03) == 1)
+            SetRegisterBits(Register.TxControlReg, 0x03);
         }
 
-        private void AntennaOff()
+        /// <summary>
+        /// Turns the RFID antenna off.
+        /// </summary>
+        public void TurnAntennaOff()
         {
-            ClearBitMask(TxControlReg, 0x03);
+            ClearRegisterBits(Register.TxControlReg, 0x03);
         }
 
-        private (byte status, byte[] backData, byte backLen) ToCard(byte command, byte[] sendData)
+        /// <summary>
+        /// Reads the register.
+        /// </summary>
+        /// <param name="register">The register.</param>
+        /// <returns>The contents of the register</returns>
+        public byte ReadRegister(Register register)
         {
+            var address = (byte)register;
+            var addressPayload = (byte)(((address << 1) & 0x7E) | 0x80);
+            var readValue = SpiPort.SendReceive(new byte[] { addressPayload, 0 });
+            return readValue[1];
+        }
+
+        /// <summary>
+        /// Sends data to the RFID card
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="sendData">The send data.</param>
+        /// <returns>A standard controller response</returns>
+        public RfidResponse CardSendData(Command command, byte[] sendData)
+        {
+            const byte MaximumLength = 16;
+
             var backData = new List<byte>();
-            byte backLen = 0;
-            var status = MI_ERR;
-            byte irqEn = 0x00;
-            byte waitIRq = 0x00;
-            byte n = 0;
+            byte receivedBitCount = 0;
+            var status = Status.Error;
+            byte interruptEnableFlags = 0x00;
+            byte waitInterruptFlags = 0x00;
+            byte currentRegisterValue = 0;
             var i = 0;
 
-            if (command == PCD_AUTHENT)
+            if (command == Command.Authenticate)
             {
-                irqEn = 0x12;
-                waitIRq = 0x10;
+                interruptEnableFlags = 0x12;
+                waitInterruptFlags = 0x10;
             }
 
-            if (command == PCD_TRANSCEIVE)
+            if (command == Command.Transcieve)
             {
-                irqEn = 0x77;
-                waitIRq = 0x30;
+                interruptEnableFlags = 0x77;
+                waitInterruptFlags = 0x30;
             }
 
-            WriteSpi(CommIEnReg, (byte)(irqEn | 0x80));
-            ClearBitMask(CommIrqReg, 0x80);
-            SetBitMask(FIFOLevelReg, 0x80);
+            WriteRegister(Register.CommIEnReg, (byte)(interruptEnableFlags | 0x80));
+            ClearRegisterBits(Register.CommIrqReg, 0x80);
+            SetRegisterBits(Register.FIFOLevelReg, 0x80);
 
-            WriteSpi(CommandReg, PCD_IDLE);
+            WriteCommand(Command.Idle);
 
             while (i < sendData.Length)
             {
-                WriteSpi(FIFODataReg, sendData[i]);
+                WriteRegister(Register.FIFODataReg, sendData[i]);
                 i++;
             }
 
-            WriteSpi(CommandReg, command);
+            WriteCommand(command);
 
-            if (command == PCD_TRANSCEIVE)
+            if (command == Command.Transcieve)
             {
-                SetBitMask(BitFramingReg, 0x80);
+                SetRegisterBits(Register.BitFramingReg, 0x80);
             }
 
             i = 2000;
             while (true)
             {
-                n = ReadSpi(CommIrqReg);
+                currentRegisterValue = ReadRegister(Register.CommIrqReg);
                 i -= 1;
                 if (Convert.ToBoolean(
-                    ~Convert.ToInt32(((i != 0) && Convert.ToBoolean(~(n & 0x01)) &&
-                                      Convert.ToBoolean(~(n & waitIRq))))))
+                    ~Convert.ToInt32((i != 0) && Convert.ToBoolean(~(currentRegisterValue & 0x01)) &&
+                    Convert.ToBoolean(~(currentRegisterValue & waitInterruptFlags)))))
                 {
                     break;
                 }
             }
 
-            ClearBitMask(BitFramingReg, 0x80);
+            ClearRegisterBits(Register.BitFramingReg, 0x80);
 
-            if (i == 0) return (status, backData.ToArray(), backLen);
+            if (i == 0)
+                return new RfidResponse(status, backData.ToArray(), receivedBitCount);
 
-            if ((ReadSpi(ErrorReg) & 0x1B) == 0x00)
+            if ((ReadRegister(Register.ErrorReg) & 0x1B) == 0x00)
             {
-                status = MI_OK;
+                status = Status.AllOk;
 
-                if (Convert.ToBoolean(n & irqEn & 0x01))
+                if (Convert.ToBoolean(currentRegisterValue & interruptEnableFlags & 0x01))
                 {
-                    status = MI_NOTAGERR;
+                    status = Status.NoTagError;
                 }
 
-                if (command == PCD_TRANSCEIVE)
+                if (command == Command.Transcieve)
                 {
-                    n = ReadSpi(FIFOLevelReg);
-                    byte? lastBits = (byte)(ReadSpi(ControlReg) & 0x07);
-                    if (lastBits != 0)
-                    {
-                        backLen = (byte)(((n - 1) * 8) + (byte)lastBits);
-                    }
-                    else
-                    {
-                        backLen = (byte)(n * 8);
-                    }
+                    currentRegisterValue = ReadRegister(Register.FIFOLevelReg);
+                    byte? lastBits = (byte)(ReadRegister(Register.ControlReg) & 0x07);
+                    receivedBitCount = (lastBits != 0) ? (byte)(((currentRegisterValue - 1) * 8) + (byte)lastBits) : (byte)(currentRegisterValue * 8);
 
-                    if (n == 0)
-                    {
-                        n = 1;
-                    }
+                    if (currentRegisterValue == 0)
+                        currentRegisterValue = 1;
 
-                    if (n > MAX_LEN)
-                    {
-                        n = MAX_LEN;
-                    }
+                    if (currentRegisterValue > MaximumLength)
+                        currentRegisterValue = MaximumLength;
 
                     i = 0;
-                    while (i < n)
+                    while (i < currentRegisterValue)
                     {
-                        backData.Add(ReadSpi(FIFODataReg));
+                        backData.Add(ReadRegister(Register.FIFODataReg));
                         i++;
                     }
                 }
             }
             else
             {
-                status = MI_ERR;
+                status = Status.Error;
             }
 
-            return (status, backData.ToArray(), backLen);
+            return new RfidResponse(status, backData.ToArray(), receivedBitCount);
         }
 
-        public (byte, int) Request(byte reqMode)
+        /// <summary>
+        /// Writes the specified data buffer to an RFID card
+        /// </summary>
+        /// <param name="blockAddress">The block address.</param>
+        /// <param name="writeData">The write data.</param>
+        /// <returns>The resulting status</returns>
+        public Status CardWriteData(byte blockAddress, byte[] writeData)
         {
-            var tagType = new List<byte> {reqMode};
+            var buff = new List<byte> { (byte)RequestMode.Write, blockAddress };
+            var crc = CalulateCRC(buff.ToArray());
+            buff.Add(crc[0]);
+            buff.Add(crc[1]);
 
-            WriteSpi(BitFramingReg, 0x07);
+            var status = Status.AllOk;
+            var transcieve = CardSendData(Command.Transcieve, buff.ToArray());
 
-            var (status, backData, backBits) = ToCard(PCD_TRANSCEIVE, tagType.ToArray());
-
-            if ((status != MI_OK) | (backBits != 0x10))
+            if (transcieve.Status != Status.AllOk || transcieve.DataBitLength != 4 || (transcieve.Data[0] & 0x0F) != 0x0A)
             {
-                status = MI_ERR;
+                status = Status.Error;
             }
 
-            return (status, backBits);
-        }
+            $"{transcieve.DataBitLength} backdata &0x0F == 0x0A {transcieve.Data[0] & 0x0F}".Debug();
 
-        public (byte status, byte[] data) Anticoll()
-        {
-            byte serNumCheck = 0;
-
-            var serNum = new List<byte>();
-
-            WriteSpi(BitFramingReg, 0x00);
-
-            serNum.Add(PICC_ANTICOLL);
-            serNum.Add(0x20);
-
-            var (status, backData, _) = ToCard(PCD_TRANSCEIVE, serNum.ToArray());
+            if (status != Status.AllOk)
+                return Status.Error;
 
             var i = 0;
-            if (status == MI_OK)
+            var buf = new List<byte>();
+            while (i < 16)
+            {
+                buf.Add(writeData[i]);
+                i++;
+            }
+
+            crc = CalulateCRC(buf.ToArray());
+            buf.Add(crc[0]);
+            buf.Add(crc[1]);
+
+            var verify = CardSendData(Command.Transcieve, buf.ToArray());
+
+            if (verify.Status != Status.AllOk || verify.DataBitLength != 4 || (verify.Data[0] & 0x0F) != 0x0A)
+            {
+                status = Status.Error;
+            }
+
+            return status;
+        }
+
+        /// <summary>
+        /// Sends a request to the RFID controller
+        /// </summary>
+        /// <param name="requestMode">The request mode.</param>
+        /// <returns>A standard response</returns>
+        public RfidResponse SendControllerRequest(RequestMode requestMode)
+        {
+            var tagType = new List<byte> { (byte)requestMode };
+            WriteRegister(Register.BitFramingReg, 0x07);
+
+            var result = CardSendData(Command.Transcieve, tagType.ToArray());
+            var status = Status.AllOk;
+            if ((result.Status != Status.AllOk) | (result.DataBitLength != 0x10))
+            {
+                status = Status.Error;
+            }
+
+            return new RfidResponse(status, result.Data, result.DataBitLength);
+        }
+
+        /// <summary>
+        /// Prepares the controller for card reading.
+        /// Resturns an OK status if a card was detected.
+        /// </summary>
+        /// <returns>The status code</returns>
+        public Status DetectCard()
+        {
+            return SendControllerRequest(RequestMode.RequestIdle).Status;
+        }
+
+        /// <summary>
+        /// Reads the card unique identifier.
+        /// </summary>
+        /// <returns>A standard response. The UID is in the Data</returns>
+        public RfidResponse ReadCardUniqueId()
+        {
+            byte serNumCheck = 0;
+            var serNum = new List<byte>();
+
+            WriteRegister(Register.BitFramingReg, 0x00);
+            serNum.Add((byte)RequestMode.AntiCollision);
+            serNum.Add(0x20);
+
+            var response = CardSendData(Command.Transcieve, serNum.ToArray());
+            var status = Status.AllOk;
+
+            var i = 0;
+            if (response.Status == Status.AllOk)
             {
                 i = 0;
             }
 
-            if (backData.Length == 5)
+            if (response.Data.Length == 5)
             {
                 while (i < 4)
                 {
-                    serNumCheck = (byte)(serNumCheck ^ backData[i]);
+                    serNumCheck = (byte)(serNumCheck ^ response.Data[i]);
                     i = i + 1;
                 }
 
-                if (serNumCheck != backData[i])
+                if (serNumCheck != response.Data[i])
                 {
-                    status = MI_ERR;
+                    status = Status.Error;
                 }
             }
             else
             {
-                status = MI_ERR;
+                status = Status.Error;
             }
 
-            return (status, backData);
+            return new RfidResponse(status, response.Data, response.DataBitLength);
         }
 
-        private byte[] CalulateCRC(byte[] pIndata)
+        /// <summary>
+        /// Selects the card UID before authentication.
+        /// Returns 0 for error.
+        /// </summary>
+        /// <param name="cardUid">The serial number.</param>
+        /// <returns>The size of the tag. 0 For error.</returns>
+        public byte SelectCardUniqueId(byte[] cardUid)
         {
-            ClearBitMask(DivIrqReg, 0x04);
-            SetBitMask(FIFOLevelReg, 0x80);
-            byte i = 0;
-            while (i < pIndata.Length)
+            var payloadBuffer = new List<byte> { (byte)RequestMode.SelectTag, 0x70 };
+            var i = 0;
+            while (i < 5)
             {
-                WriteSpi(FIFODataReg, pIndata[i]);
+                payloadBuffer.Add(cardUid[i]);
                 i++;
             }
 
-            WriteSpi(CommandReg, PCD_CALCCRC);
+            var crcHashCode = CalulateCRC(payloadBuffer.ToArray());
+            payloadBuffer.Add(crcHashCode[0]);
+            payloadBuffer.Add(crcHashCode[1]);
+            var response = CardSendData(Command.Transcieve, payloadBuffer.ToArray());
+
+            if (response.Status != Status.AllOk || response.DataBitLength != 0x18)
+                return 0;
+
+            $"Size: {response.Data[0]}".Debug();
+            return response.Data[0];
+        }
+
+        /// <summary>
+        /// Authenticates the previosuly selected card UID in 1A mode.
+        /// </summary>
+        /// <param name="sectorkey">The sectorkey.</param>
+        /// <param name="cardUid">The card uid.</param>
+        /// <param name="blockAddress">The block address.</param>
+        /// <returns>The status code</returns>
+        public Status AuthenticateCard1A(byte[] sectorkey, byte[] cardUid, Register blockAddress = Register.Status2Reg)
+        {
+            return Authenticate(RequestMode.Authenticate1A, (byte)blockAddress, sectorkey, cardUid);
+        }
+
+        /// <summary>
+        /// Authenticates the previosuly selected card UID in 1B mode.
+        /// </summary>
+        /// <param name="sectorkey">The sectorkey.</param>
+        /// <param name="cardUid">The card uid.</param>
+        /// <param name="blockAddress">The block address.</param>
+        /// <returns>The status code</returns>
+        public Status AuthenticateCard1B(byte[] sectorkey, byte[] cardUid, Register blockAddress = Register.Status2Reg)
+        {
+            return Authenticate(RequestMode.Authenticate1B, (byte)blockAddress, sectorkey, cardUid);
+        }
+
+        /// <summary>
+        /// Clears the card selection for authentication purposes.
+        /// </summary>
+        public void ClearCardSelection()
+        {
+            ClearRegisterBits(Register.Status2Reg, 0x08);
+        }
+
+        /// <summary>
+        /// Reads the authenticated registers.
+        /// </summary>
+        /// <param name="authKey">The authentication key.</param>
+        /// <param name="cardUniqueId">The card unique identifier.</param>
+        /// <returns>A byte array with the contents of the authenticated registers</returns>
+        public byte[] DumpRegisters(byte[] authKey, byte[] cardUniqueId)
+        {
+            const byte RegisterCount = 64;
+            var result = new byte[RegisterCount];
+            byte i = 0;
+
+            while (i < RegisterCount)
+            {
+                // Check if authenticated
+                if (Authenticate(RequestMode.Authenticate1A, i, authKey, cardUniqueId) == Status.AllOk)
+                    result[i] = ReadRegister((Register)i);
+                else
+                    "Authentication error".Error(nameof(RFIDControllerMfrc522));
+
+                i++;
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Initializes the component.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            OutputPort.PinMode = GpioPinDriveMode.Output;
+            OutputPort.Write(true);
+
+            Reset();
+
+            WriteRegister(Register.TModeReg, 0x8D);
+            WriteRegister(Register.TPrescalerReg, 0x3E);
+            WriteRegister(Register.TReloadRegL, 0x1E);
+            WriteRegister(Register.TReloadRegH, 0x00);
+            WriteRegister(Register.TxAutoReg, 0x40);
+            WriteRegister(Register.ModeReg, 0x3D);
+
+            TurnAntennaOn();
+        }
+
+        /// <summary>
+        /// Writes the register.
+        /// </summary>
+        /// <param name="register">The register.</param>
+        /// <param name="value">The value.</param>
+        private void WriteRegister(byte register, byte value)
+        {
+            SpiPort.Write(new byte[]
+            {
+                (byte)((register << 1) & 0x7E),
+                value
+            });
+        }
+
+        /// <summary>
+        /// Writes the register.
+        /// </summary>
+        /// <param name="register">The register.</param>
+        /// <param name="value">The value.</param>
+        private void WriteRegister(Register register, byte value)
+        {
+            WriteRegister((byte)register, value);
+        }
+
+        /// <summary>
+        /// Writes the command.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        private void WriteCommand(Command value)
+        {
+            WriteRegister(Register.CommandReg, (byte)value);
+        }
+
+        /// <summary>
+        /// Sets the register bits.
+        /// </summary>
+        /// <param name="register">The register.</param>
+        /// <param name="bitMask">The bit mask.</param>
+        private void SetRegisterBits(Register register, byte bitMask)
+        {
+            var readValue = ReadRegister(register);
+            WriteRegister(register, (byte)(readValue | bitMask));
+        }
+
+        /// <summary>
+        /// Clears the register bits.
+        /// </summary>
+        /// <param name="register">The register.</param>
+        /// <param name="bitMask">The bit mask.</param>
+        private void ClearRegisterBits(Register register, byte bitMask)
+        {
+            var readValue = ReadRegister(register);
+            WriteRegister(register, (byte)(readValue & (~bitMask)));
+        }
+
+        /// <summary>
+        /// Calulates the CRC Hash as an array of bytes.
+        /// Returns a 2-byte array
+        /// </summary>
+        /// <param name="pIndata">The p indata.</param>
+        /// <returns>a 2-byte array with the CRC</returns>
+        private byte[] CalulateCRC(byte[] pIndata)
+        {
+            ClearRegisterBits(Register.DivIrqReg, 0x04);
+            SetRegisterBits(Register.FIFOLevelReg, 0x80);
+            byte i = 0;
+            while (i < pIndata.Length)
+            {
+                WriteRegister(Register.FIFODataReg, pIndata[i]);
+                i++;
+            }
+
+            WriteCommand(Command.ComputeCrc);
             i = 0xFF;
             while (true)
             {
-                var n = ReadSpi(DivIrqReg);
+                var n = ReadRegister(Register.DivIrqReg);
                 i--;
                 if (!((i != 0) && !Convert.ToBoolean(n & 0x04)))
                 {
@@ -375,37 +976,22 @@ namespace IotTest
                 }
             }
 
-            var pOutData = new List<byte> {ReadSpi(CRCResultRegL), ReadSpi(CRCResultRegM)};
-            return pOutData.ToArray();
+            var outputData = new byte[] { ReadRegister(Register.CRCResultRegL), ReadRegister(Register.CRCResultRegM) };
+            return outputData;
         }
 
-        public byte SelectTag(byte[] serNum)
-        {
-            var buf = new List<byte> { PICC_SElECTTAG, 0x70 };
-            var i = 0;
-            while (i < 5)
-            {
-                buf.Add(serNum[i]);
-                i++;
-            }
-
-            var pOut = CalulateCRC(buf.ToArray());
-            buf.Add(pOut[0]);
-            buf.Add(pOut[1]);
-            var (status, backData, backBits) = ToCard(PCD_TRANSCEIVE, buf.ToArray());
-
-            if (status != MI_OK || backBits != 0x18) 
-                return 0;
-
-            $"Size: {backData[0]}".Debug();
-            return backData[0];
-
-        }
-
-        public byte Auth(byte authMode, byte blockAddr, byte[] sectorkey, byte[] serNum)
+        /// <summary>
+        /// Authenticates the card using the specified authentication mode.
+        /// </summary>
+        /// <param name="authMode">The authentication mode.</param>
+        /// <param name="blockAddress">The block address.</param>
+        /// <param name="sectorkey">The sectorkey.</param>
+        /// <param name="cardUid">The card uid.</param>
+        /// <returns>A status code</returns>
+        private Status Authenticate(RequestMode authMode, byte blockAddress, byte[] sectorkey, byte[] cardUid)
         {
             // First byte should be the authMode (A or B) Second byte is the trailerBlock (usually 7)
-            var buff = new List<byte> { authMode, blockAddr };
+            var buff = new List<byte> { (byte)authMode, blockAddress };
 
             // Now we need to append the authKey which usually is 6 bytes of 0xFF
             var i = 0;
@@ -420,95 +1006,73 @@ namespace IotTest
             // Next we append the first 4 bytes of the UID
             while (i < 4)
             {
-                buff.Add(serNum[i]);
+                buff.Add(cardUid[i]);
                 i++;
             }
 
             // Now we start the authentication itself
-            var (status, _, _) = ToCard(PCD_AUTHENT, buff.ToArray());
+            var response = CardSendData(Command.Authenticate, buff.ToArray());
+            var status = response.Status;
 
             // Check if an error occurred
-            if (status != MI_OK)
-            {
-                "AUTH ERROR!!".Error();
-            }
+            if (status != Status.AllOk)
+                status = Status.Error;
 
-            if ((ReadSpi(Status2Reg) & 0x08) == 0)
-            {
-                "AUTH ERROR(status2reg & 0x08) != 0".Info();
-            }
+            if ((ReadRegister(Register.Status2Reg) & 0x08) == 0)
+                status = Status.Error;
+
+            status = Status.AllOk;
 
             // Return the status
             return status;
         }
 
-        public void StopCrypto1()
+        #endregion
+
+        #region Support Classes
+
+        /// <summary>
+        /// Holds the status and data of a controller response
+        /// </summary>
+        public class RfidResponse
         {
-            ClearBitMask(Status2Reg, 0x08);
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RfidResponse"/> class.
+            /// </summary>
+            /// <param name="status">The status.</param>
+            /// <param name="receivedData">The payload of the received data.</param>
+            /// <param name="receivedBitCount">The received bit count.</param>
+            internal RfidResponse(Status status, byte[] receivedData, byte receivedBitCount)
+            {
+                Status = status;
+                Data = receivedData;
+                DataBitLength = receivedBitCount;
+            }
+
+            /// <summary>
+            /// Prevents a default instance of the <see cref="RfidResponse"/> class from being created.
+            /// </summary>
+            private RfidResponse()
+            {
+                // placeholder
+            }
+
+            /// <summary>
+            /// Gets the status.
+            /// </summary>
+            public Status Status { get; }
+
+            /// <summary>
+            /// Gets the data.
+            /// </summary>
+            public byte[] Data { get; }
+
+            /// <summary>
+            /// Gets the length of the data.
+            /// </summary>
+            public byte DataBitLength { get; }
         }
 
-        private void Write(byte blockAddr, byte[] writeData)
-        {
-            var buff = new List<byte> {PICC_WRITE, blockAddr};
-            var crc = CalulateCRC(buff.ToArray());
-            buff.Add(crc[0]);
-            buff.Add(crc[1]);
-            var (status, backData, backLen) = ToCard(PCD_TRANSCEIVE, buff.ToArray());
-
-            if (status != MI_OK || backLen != 4 || (backData[0] & 0x0F) != 0x0A)
-            {
-                status = MI_ERR;
-            }
-
-            $"{backLen} backdata &0x0F == 0x0A {backData[0] & 0x0F}".Debug();
-
-            if (status != MI_OK) return;
-
-            var i = 0;
-            var buf = new List<byte>();
-            while (i < 16)
-            {
-                buf.Add(writeData[i]);
-                i++;
-            }
-
-            crc = CalulateCRC(buf.ToArray());
-            buf.Add(crc[0]);
-            buf.Add(crc[1]);
-
-            (status, backData, backLen) = ToCard(PCD_TRANSCEIVE, buf.ToArray());
-
-            if (status != MI_OK || backLen != 4 || (backData[0] & 0x0F) != 0x0A)
-            {
-                "Error while writing".Error();
-            }
-
-            if (status == MI_OK)
-            {
-                "Data written".Info();
-            }
-        }
-
-        public void DumpClassic1K(byte[] key, byte[] uid)
-        {
-            byte i = 0;
-
-            while (i < 64)
-            {
-                var status = Auth(PICC_AUTHENT1A, i, key, uid);
-
-                // Check if authenticated
-                if (status == MI_OK)
-                {
-                    ReadSpi(i);
-                }
-                else
-                {
-                    "Authentication error".Error();
-                }
-
-                i++;
-            }
-        }
+        #endregion
     }
 }

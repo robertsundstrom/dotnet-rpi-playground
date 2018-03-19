@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27512.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IotTest", "IotTest.csproj", "{C2D16415-6E95-47E5-9DA6-E941C3F6657C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IotTest", "IotTest.csproj", "{208D1120-D8CF-40AC-900E-D364A55293CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C2D16415-6E95-47E5-9DA6-E941C3F6657C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2D16415-6E95-47E5-9DA6-E941C3F6657C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2D16415-6E95-47E5-9DA6-E941C3F6657C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2D16415-6E95-47E5-9DA6-E941C3F6657C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{208D1120-D8CF-40AC-900E-D364A55293CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{208D1120-D8CF-40AC-900E-D364A55293CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{208D1120-D8CF-40AC-900E-D364A55293CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{208D1120-D8CF-40AC-900E-D364A55293CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {1DAD655D-DAFA-4F9C-947E-7C97FC2051AB}
+		SolutionGuid = {A5E87BC7-AC0B-434E-BA3C-B566826C45F3}
 	EndGlobalSection
 EndGlobal
