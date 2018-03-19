@@ -77,7 +77,7 @@ namespace IotTest
                 var (a, b, c, d) = e.Tag;
                 var tag = $"{a},{b},{c},{d}";
                 notificationsMessageHandler.InvokeClientMethodToAllAsync("rfidRead", tag);
-            };
+            });
             rfidReader.Start();
         }
     }
